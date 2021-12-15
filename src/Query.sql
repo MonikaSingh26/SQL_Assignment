@@ -85,15 +85,21 @@ Query- select CNAME from Customers where SNUM IN (select SNUM from Salespeople);
 7) Find the names and numbers of all salespeople who have more than one customer.
 ----------------------------------------------------------------------------------
 Query-
+
+
 8) Count the orders of each of the salespeople and output the results in descending order.
 -------------------------------------------------------------------------------------------
 Query-
+
+
 9) List the customer table if and only if one or more of the customers in the Customer table are located in SanJose.
 ---------------------------------------------------------------------------------------------------------------------
 Query-
 10) Match salespeople to customers according to what city they live in.
 ------------------------------------------------------------------------
 Query-
+
+
 11) Find all the customers in SanJose who have a rating above 200.
 -------------------------------------------------------------------
 Query- select * from Customers where RATING > 200 and CITY = 'SanJose';
@@ -145,19 +151,40 @@ Query- select CNAME from Customers, Orders where Customers.CNUM = Orders.CNUM AN
 the maximum Amount.
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Query-
+
+
 16) Select all orders that had amounts that were greater than at least one of the orders from October 6.
+--------------------------------------------------------------------------------------------------------
 Query-
+
+
 17) Write a query that uses the EXISTS operator to extract all salespeople who have customers with a rating of 300.
+-------------------------------------------------------------------------------------------------------------------
 Query-
+
+
 18) Find all customers whose cnum is 1000 above the snum of Serres.
+-------------------------------------------------------------------
 Query-
+
+
 19) Give the salespeople’s commissions as percentages instead of decimal numbers.
+---------------------------------------------------------------------------------
 Query-
+
+
 20) Find the largest order taken by each salesperson on each date, eliminating those Maximum orders, which are less than 3000.
+------------------------------------------------------------------------------------------------------------------------------
 Query-
+
+
 21) List all the largest orders for October 3, for each salesperson.
+--------------------------------------------------------------------
 Query-
+
+
 22) Find all customers located in cities where Serres has customers.
+--------------------------------------------------------------------
 Query-
 
 
@@ -173,17 +200,36 @@ Query- select * from Customers where RATING > 200;
 
 
 24) Count the number of salespeople currently having orders in the orders table.
+--------------------------------------------------------------------------------
 Query-
+
+
 25) Write a query that produces all customers serviced by salespeople with a commission above 12%. Output the customer’s name,
 salesperson’s name and the salesperson’s rate of commission.
+------------------------------------------------------------------------------------------------------------------------------
 Query-
+
+
 26) Find salespeople who have multiple customers.
+--------------------------------------------------
 Query-
+
+
 27) Find salespeople with customers located in their own cities.
+-----------------------------------------------------------------
 Query-
+
+
 28) Find all salespeople whose name starts with ‘P’ and fourth character is ‘I’.
+--------------------------------------------------------------------------------
 Query-
+
+
 29) Write a query that uses a subquery to obtain all orders for the customer named ‘Cisneros’. Assume you do not know his customer number.
+-------------------------------------------------------------------------------------------------------------------------------------------
 Query-
+
+
 30) Find the largest orders for Serres and Rifkin.
+--------------------------------------------------
 Query-
