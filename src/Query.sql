@@ -25,20 +25,17 @@ Query- SELECT CNAME FROM customers WHERE RATING = 100;
 
 3) Find the largest order taken by each Salesperson on each date.
 ------------------------------------------------------------------
-Query- SELECT SNUM, ODATE, MAX(AMT) FROM orders GROUP BY ODATE, SNUM;
-       +------+----------+----------+
-       | SNUM | ODATE    | MAX(AMT) |
-       +------+----------+----------+
-       | 1001 | 10/03/90 |   767.19 |
-       | 1002 | 10/03/90 |  5160.45 |
-       | 1004 | 10/03/90 |   1900.1 |
-       | 1007 | 10/03/90 |  1098.16 |
-       | 1002 | 10/04/90 |    75.75 |
-       | 1003 | 10/04/90 |  1713.23 |
-       | 1001 | 10/05/90 |     4723 |
-       | 1001 | 10/06/90 |  9891.88 |
-       | 1002 | 10/06/90 |  1309.95 |
-       +------+----------+----------+
+Query- SELECT s.SNUM, s.SNAME, o.ODATE, o.AMT FROM salespeople as s, orders as o WHERE s.SNUM = o.SNUM and o.AMT IN(SELECT  MAX(AMT) FROM orders GROUP BY SNUM);
+
+       +------+---------+----------+---------+
+       | SNUM | SNAME   | ODATE    | AMT     |
+       +------+---------+----------+---------+
+       | 1004 | Motika  | 10/03/90 |  1900.1 |
+       | 1002 | Serres  | 10/03/90 | 5160.45 |
+       | 1007 | Riffikn | 10/03/90 | 1098.16 |
+       | 1003 | AxelRod | 10/04/90 | 1713.23 |
+       | 1001 | Peel    | 10/06/90 | 9891.88 |
+       +------+---------+----------+---------+
 
 4) Arrange the Order table by descending customer number.
 ----------------------------------------------------------
@@ -73,44 +70,41 @@ Query- SELECT SNAME FROM salespeople WHERE SNUM IN (SELECT SNUM FROM orders);
 
 6) List names of all customers matched with the salespeople serving them.
 --------------------------------------------------------------------------
-Query- SELECT CNAME FROM customers WHERE SNUM IN (SELECT SNUM FROM salespeople);
-       +----------+
-       | CNAME    |
-       +----------+
-       | Hoffman  |
-       | Glovanni |
-       | Liu      |
-       | Grass    |
-       | Clemens  |
-       | Pereira  |
-       | Cisneros |
-       +----------+
+Query- SELECT c.CNAME, s.SNAME FROM customers as c, salespeople as s WHERE s.SNUM = c.SNUM;
+       +----------+---------+
+       | CNAME    | SNAME   |
+       +----------+---------+
+       | Hoffman  | Peel    |
+       | Glovanni | AxelRod |
+       | Liu      | Serres  |
+       | Grass    | Serres  |
+       | Clemens  | Peel    |
+       | Pereira  | Motika  |
+       | Cisneros | Riffikn |
+       +----------+---------+
 
 7) Find the names and numbers of all salespeople who have more than one customer.
 ----------------------------------------------------------------------------------
-Query- SELECT c.SNUM, s.SNAME, COUNT(*) AS COUNT FROM customers c, salespeople s WHERE c.SNUM = s.SNUM GROUP BY c.SNUM;
-       +------+---------+-------+
-       | SNUM | SNAME   | COUNT |
-       +------+---------+-------+
-       | 1001 | Peel    |     2 |
-       | 1002 | Serres  |     2 |
-       | 1003 | AxelRod |     1 |
-       | 1004 | Motika  |     1 |
-       | 1007 | Riffikn |     1 |
-       +------+---------+-------+
+Query- SELECT SNUM, SNAME FROM salespeople as s WHERE 1 < (SELECT COUNT(*) as COUNT FROM customers WHERE SNUM = s.SNUM);
+       +------+--------+
+       | SNUM | SNAME  |
+       +------+--------+
+       | 1001 | Peel   |
+       | 1002 | Serres |
+       +------+--------+
 
 8) Count the orders of each of the salespeople and output the results in descending order.
 -------------------------------------------------------------------------------------------
-Query- SELECT COUNT(ONUM), SNUM FROM orders GROUP BY SNUM ORDER BY COUNT(ONUM) DESC;
-       +-------------+------+
-       | COUNT(ONUM) | SNUM |
-       +-------------+------+
-       |           3 | 1001 |
-       |           3 | 1002 |
-       |           2 | 1007 |
-       |           1 | 1004 |
-       |           1 | 1003 |
-       +-------------+------+
+Query- SELECT COUNT(ONUM), o.SNUM, s.SNAME FROM orders as o, salespeople as s WHERE o.SNUM = s.SNUM GROUP BY s.SNUM ORDER BY COUNT(ONUM) DESC;
+       +-------------+------+---------+
+       | COUNT(ONUM) | SNUM | SNAME   |
+       +-------------+------+---------+
+       |           3 | 1002 | Serres  |
+       |           3 | 1001 | Peel    |
+       |           2 | 1007 | Riffikn |
+       |           1 | 1003 | AxelRod |
+       |           1 | 1004 | Motika  |
+       +-------------+------+---------+
 
 9) List the customer table if and only if one or more of the customers in the Customer table are located in SanJose.
 10) Match salespeople to customers according to what city they live in.
@@ -169,14 +163,11 @@ Query- SELECT CNAME FROM customers c, orders o where c.CNUM = o.CNUM AND ODATE L
 15) Give the sums of the amounts from the Orders table, grouped by date, eliminating all those dates where the SUM was not at least 2000 above
 the maximum Amount.
 ------------------------------------------------------------------------------------------------------------------------------------------------
-Query- SELECT ODATE, SUM(AMT) FROM orders GROUP BY ODATE;
+Query- SELECT ODATE, SUM(AMT) FROM orders as o GROUP BY ODATE HAVING SUM(AMT) > (SELECT MAX(AMT) + 2000 FROM orders as od WHERE o.ODATE = od.ODATE);
        +----------+----------+
        | ODATE    | SUM(AMT) |
        +----------+----------+
        | 10/03/90 |  8944.59 |
-       | 10/04/90 |  1788.98 |
-       | 10/05/90 |     4723 |
-       | 10/06/90 | 11201.83 |
        +----------+----------+
 
 16) Select all orders that had amounts that were greater than at least one of the orders from October 6.
@@ -196,12 +187,10 @@ Query- SELECT SNAME, SNUM FROM salespeople WHERE EXISTS(SELECT RATING FROM custo
 
 18) Find all customers whose cnum is 1000 above the snum of Serres.
 -------------------------------------------------------------------
-Query- SELECT CNUM, CNAME FROM customers WHERE CNUM > (SELECT SNUM FROM salespeople WHERE SNAME LIKE 'Serres');
+Query- SELECT CNUM, CNAME FROM customers WHERE CNUM > (SELECT SNUM + 1000 FROM salespeople WHERE SNAME LIKE 'Serres');
        +------+----------+
        | CNUM | CNAME    |
        +------+----------+
-       | 2001 | Hoffman  |
-       | 2002 | Glovanni |
        | 2003 | Liu      |
        | 2004 | Grass    |
        | 2006 | Clemens  |
@@ -211,28 +200,28 @@ Query- SELECT CNUM, CNAME FROM customers WHERE CNUM > (SELECT SNUM FROM salespeo
 
 19) Give the salespeople’s commissions as percentages instead of decimal numbers.
 ---------------------------------------------------------------------------------
-Query- SELECT SNAME, COMM * 100 as PERCENTAGE FROM salespeople;
-       +---------+------------+
-       | SNAME   | PERCENTAGE |
-       +---------+------------+
-       | Peel    |       1200 |
-       | Serres  |       1300 |
-       | AxelRod |       1000 |
-       | Motika  |       1100 |
-       | Riffikn |       1500 |
-       | Fran    |       2500 |
-       +---------+------------+
+Query- SELECT SNAME, SNUM, COMM, COMM*100,'%' FROM salespeople;
+       +---------+------+------+----------+---+
+       | SNAME   | SNUM | COMM | COMM*100 | % |
+       +---------+------+------+----------+---+
+       | Peel    | 1001 |   12 |     1200 | % |
+       | Serres  | 1002 |   13 |     1300 | % |
+       | AxelRod | 1003 |   10 |     1000 | % |
+       | Motika  | 1004 |   11 |     1100 | % |
+       | Riffikn | 1007 |   15 |     1500 | % |
+       | Fran    | 1008 |   25 |     2500 | % |
+       +---------+------+------+----------+---+
 
 20) Find the largest order taken by each salesperson on each date, eliminating those Maximum orders, which are less than 3000.
 ------------------------------------------------------------------------------------------------------------------------------
-Query- SELECT ODATE, SNUM, MAX(AMT) FROM orders WHERE AMT > 3000 GROUP BY ODATE, SNUM order by ODATE, SNUM;
-       +----------+------+----------+
-       | ODATE    | SNUM | MAX(AMT) |
-       +----------+------+----------+
-       | 10/03/90 | 1002 |  5160.45 |
-       | 10/05/90 | 1001 |     4723 |
-       | 10/06/90 | 1001 |  9891.88 |
-       +----------+------+----------+
+Query- SELECT s.SNAME, o.SNUM, o.ODATE, o.ONUM, o.AMT FROM salespeople as s, orders as o WHERE o.SNUM = s.SNUM and AMT > 3000;
+       +--------+------+----------+------+---------+
+       | SNAME  | SNUM | ODATE    | ONUM | AMT     |
+       +--------+------+----------+------+---------+
+       | Serres | 1002 | 10/03/90 | 3005 | 5160.45 |
+       | Peel   | 1001 | 10/05/90 | 3008 |    4723 |
+       | Peel   | 1001 | 10/06/90 | 3011 | 9891.88 |
+       +--------+------+----------+------+---------+
 
 21) List all the largest orders for October 3, for each salesperson.
 22) Find all customers located in cities where Serres has customers.
@@ -248,22 +237,12 @@ Query- select * from Customers where RATING > 200;
 
 24) Count the number of salespeople currently having orders in the orders table.
 --------------------------------------------------------------------------------
-Query- SELECT ODATE, SNUM, ONUM, COUNT(*) FROM orders GROUP BY ODATE, SNUM, ONUM;
-       +----------+------+------+----------+
-       | ODATE    | SNUM | ONUM | COUNT(*) |
-       +----------+------+------+----------+
-       | 10/03/90 | 1001 | 3003 |        1 |
-       | 10/03/90 | 1002 | 3005 |        1 |
-       | 10/03/90 | 1004 | 3002 |        1 |
-       | 10/03/90 | 1007 | 3001 |        1 |
-       | 10/03/90 | 1007 | 3006 |        1 |
-       | 10/04/90 | 1002 | 3007 |        1 |
-       | 10/04/90 | 1003 | 3009 |        1 |
-       | 10/05/90 | 1001 | 3008 |        1 |
-       | 10/06/90 | 1001 | 3011 |        1 |
-       | 10/06/90 | 1002 | 3010 |        1 |
-       +----------+------+------+----------+
-       10 rows in set (0.00 sec)
+Query- SELECT COUNT(DISTINCT SNUM) FROM orders;
+       +----------------------+
+       | COUNT(DISTINCT SNUM) |
+       +----------------------+
+       |                    5 |
+       +----------------------+
 
 25) Write a query that produces all customers serviced by salespeople with a commission above 12%. Output the customer’s name,
 salesperson’s name and the salesperson’s rate of commission.
